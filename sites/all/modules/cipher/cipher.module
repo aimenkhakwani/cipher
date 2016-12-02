@@ -1,0 +1,108 @@
+<?php
+    function cipher_menu()
+    {
+        $items['cipher'] = array(
+            'title' => 'Cipher',
+            'page callback' => 'drupal_get_form',
+            'page arguments' => array('cipher_form'),
+            'access callback' => TRUE,
+            'type' => MENU_NORMAL_ITEM,
+        );
+        $items['cipher_success_page'] = array(
+            'title' => 'Success',
+            'page callback' => 'cipher_success',
+            'access callback' => TRUE,
+            'type' => MENU_CALLBACK,
+        );
+        return $items;
+    }
+
+    function cipher_form()
+    {
+        $form['message'] = array(
+            '#title' => 'Enter a word or sentence',
+            '#type' => 'textfield',
+            '#required' => TRUE,
+        );
+
+        $form['direction'] = array(
+            '#title' => 'Enter a direction (left or right)',
+            '#element_validate' => array('element_validate_direction'),
+            '#type' => 'textfield',
+            '#required' => TRUE,
+        );
+
+        $form['number'] = array(
+            '#title' => 'Enter a positive number',
+            '#type' => 'textfield',
+            '#element_validate' => array('element_validate_integer_positive'),
+            '#required' => TRUE,
+        );
+
+        $form['submit'] = array(
+            '#type' => 'submit',
+            '#value' => 'Go',
+        );
+        return $form;
+    }
+
+    function element_validate_direction($element)
+    {
+        $valid = array("left", "right");
+        $val = strtolower($element['#value']);
+        if (in_array($val, $valid) == false) {
+            form_error($element, t('You can only enter either left or right as a direction!'));
+        }
+    }
+
+    function cipher_form_submit($form, &$form_state)
+    {
+        $alphabet = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
+        $input_sentence = $form_state['values']['message'];
+        $input_array = str_split($input_sentence);
+        $input_move = $form_state['values']['direction'];
+        $input_spaces = $form_state['values']['number'];
+        $output = array();
+
+        foreach ($input_array as &$value) {
+            if(in_array($value, $alphabet)) {
+                $key = array_search($value, $alphabet);
+                if($input_move === "right") {
+                    if($key + $input_spaces > 25) {
+                        $x = 26 - $key;
+                        $key = $input_spaces - $x;
+                        $letter = $alphabet[$key];
+                        array_push($output, $letter);
+                    } else {
+                        $key = $key + $input_spaces;
+                        $letter = $alphabet[$key];
+                        array_push($output, $letter);
+                    }
+                } elseif($input_move === "left") {
+                    if($key - $input_spaces < 0) {
+                        $x = 26 - $key;
+                        $y = 26 - $x;
+                        $j = $input_spaces - $y;
+                        $key = 26 - $j;
+                        $letter = $alphabet[$key];
+                        array_push($output, $letter);
+                    } else {
+                        $key = $key - $input_spaces;
+                        $letter = $alphabet[$key];
+                        array_push($output, $letter);
+                    }
+                }
+            } else {
+                array_push($output, $value);
+            }
+        }
+        $output = implode("", $output);
+        $_SESSION['cipher_output'] = $output;
+        $form_state['redirect'] = 'cipher_success_page';
+    }
+
+    function cipher_success()
+    {
+        $return_message = $_SESSION['cipher_output'];
+        return "Your coded message is: $return_message";
+    }
