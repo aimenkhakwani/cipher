@@ -3,3 +3,4 @@ description = A cipher.
 package = My First Modules
 core = 7.x
 files[] = cipher.module
+stylesheets[all][] = cipher.css
