@@ -35,7 +35,7 @@
         $form['number'] = array(
             '#title' => 'Enter a positive number',
             '#type' => 'textfield',
-            '#element_validate' => array('element_validate_integer_positive'),
+            '#element_validate' => array('element_validate_integer_positive', 'element_validate_number_range'),
             '#required' => TRUE,
         );
 
@@ -52,6 +52,14 @@
         $val = strtolower($element['#value']);
         if (in_array($val, $valid) == false) {
             form_error($element, t('You can only enter either left or right as a direction!'));
+        }
+    }
+
+    function element_validate_number_range($element)
+    {
+        $val = $element['#value'];
+         if ($element['#value'] > 25) {
+            form_error($element, t('Please enter a positive number under 25. Remember there are only 26 letters in the alphabet!'));
         }
     }
 
