@@ -21,6 +21,7 @@
     {
         $form['message'] = array(
             '#title' => 'Enter a word or sentence',
+            '#element_validate' => array('element_validate_sentence'),
             '#type' => 'textfield',
             '#required' => TRUE,
         );
@@ -46,12 +47,23 @@
         return $form;
     }
 
+    function element_validate_sentence($element)
+    {
+        $valid_char = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','!', ',', '.', '?', " ");
+        $letters = str_split($element['#value']);
+        foreach($letters as $each_letter) {
+            if (in_array($each_letter, $valid_char) == false) {
+                form_error($element, t('Please enter only letters, spaces or punctuation in your message!'));
+            }
+        }
+    }
+
     function element_validate_direction($element)
     {
         $valid = array("left", "right");
         $val = strtolower($element['#value']);
         if (in_array($val, $valid) == false) {
-            form_error($element, t('You can only enter either left or right as a direction!'));
+            form_error($element, t('Please enter either left or right as a direction!'));
         }
     }
 
